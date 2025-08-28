@@ -1,0 +1,49 @@
+# ============================
+# Terraform main.tf
+# ============================
+
+# Specify Terraform AWS provider with authentication
+provider "aws" {
+  region     = "ap-south-1"                        # ✅ Mumbai region
+  access_key = "AKIASHTNIMZUBUOPP3XK"              # ✅ Your Access Key
+  secret_key = "QJF088kOEV7FVChvnMSb0B/TCackRo917ck4KZZ" # ✅ Your Secret Key
+}
+
+# Create a Security Group to allow SSH and HTTP
+resource "aws_security_group" "ec2_sg" {
+  name        = "ec2-security-group"
+  description = "Allow SSH and HTTP"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]   # SSH open
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]   # HTTP open
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]   # All outbound
+  }
+}
+
+# Create EC2 Instance
+resource "aws_instance" "my_ec2" {
+  ami                    = "ami-0f58b397bc5c1f2e8" # ✅ Ubuntu 22.04 LTS (Mumbai region AMI)
+  instance_type          = "t2.micro"              # ✅ Free-tier eligible
+  security_groups        = [aws_security_group.ec2_sg.name]
+  key_name               = "my-key"                # ✅ Replace with your AWS key pair name
+
+  tags = {
+    Name = "Terraform-EC2"
+  }
+}
